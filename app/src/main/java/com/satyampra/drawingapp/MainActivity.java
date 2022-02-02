@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -20,8 +22,16 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.kyanogen.signatureview.SignatureView;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import yuku.ambilwarna.AmbilWarnaDialog;
 
@@ -48,6 +58,14 @@ public class MainActivity extends AppCompatActivity {
         txtPenSize = findViewById(R.id.txtPenSize);
         defaultColor = ContextCompat.getColor(MainActivity.this, R.color.black);
         askPermission();
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
+        String date=simpleDateFormat.format(new Date());
+        fileName=path+"/"+date+".png";
+
+        if(!path.exists()){
+            path.mkdirs();
+        }
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -86,11 +104,41 @@ public class MainActivity extends AppCompatActivity {
         imgSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!signatureView.isBitmapEmpty()){
+                    try {
+                        saveImage();
+                    } catch (IOException e) {
+                        e.printStackTrace();
 
+                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        Log.e("sat",e.toString());
+
+                    }
+
+                }
+                else {
+                        Toast.makeText(MainActivity.this,"Please Draw First",Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
+    private void saveImage() throws IOException {
+        File file=new File(fileName);
+        Bitmap bitmap=signatureView.getSignatureBitmap();
+
+        ByteArrayOutputStream bos=new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,0,bos);
+        byte[] bitmapData=bos.toByteArray();
+
+        FileOutputStream fos=new FileOutputStream(file);
+        fos.write(bitmapData);
+        fos.flush();
+        fos.close();
+
+        Toast.makeText(this,"Painting Saved!",Toast.LENGTH_SHORT).show();
+
+    }
     private void openColorPicker() {
         AmbilWarnaDialog ambilWarnaDialog = new AmbilWarnaDialog(this, defaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
             @Override
