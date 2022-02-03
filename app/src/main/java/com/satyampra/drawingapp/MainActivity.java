@@ -1,5 +1,6 @@
 package com.satyampra.drawingapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -8,8 +9,12 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,8 +42,9 @@ import yuku.ambilwarna.AmbilWarnaDialog;
 
 public class MainActivity extends AppCompatActivity {
     SignatureView signatureView;
-    ImageButton imgEraser, imgColor, imgSave;
+    ImageButton imgEraser, imgColor, imgPen;
     SeekBar seekBar;
+    ImageView penImg;
     TextView txtPenSize;
     int defaultColor;
 
@@ -53,23 +59,24 @@ public class MainActivity extends AppCompatActivity {
         signatureView = findViewById(R.id.signature_view);
         imgEraser = findViewById(R.id.btn_eraser);
         imgColor = findViewById(R.id.btn_color);
-        imgSave = findViewById(R.id.btn_save);
+        imgPen = findViewById(R.id.btn_pen);
+        penImg = findViewById(R.id.penImg);
         seekBar = findViewById(R.id.penSize);
         txtPenSize = findViewById(R.id.txtPenSize);
         defaultColor = ContextCompat.getColor(MainActivity.this, R.color.black);
         askPermission();
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
-        String date=simpleDateFormat.format(new Date());
-        fileName=path+"/"+date+".png";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
+        String date = simpleDateFormat.format(new Date());
+        fileName = path + "/" + date + ".jpg";
 
-        if(!path.exists()){
+        if (!path.exists()) {
             path.mkdirs();
         }
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                txtPenSize.setText(i+"dp");
+                txtPenSize.setText(i + "dp");
                 signatureView.setPenSize(i);
                 seekBar.setMax(50);
             }
@@ -85,9 +92,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        imgPen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                penImg.setImageResource(R.drawable.ic_baseline_brush_24);
+                signatureView.setPenColor(defaultColor);
+                imgColor.setEnabled(true);
+
+            }
+        });
+
         imgColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                penImg.setImageResource(R.drawable.ic_baseline_brush_24);
                 openColorPicker();
             }
 
@@ -96,49 +115,34 @@ public class MainActivity extends AppCompatActivity {
         imgEraser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                signatureView.clearCanvas();
+                int color;
+                penImg.setImageResource(R.drawable.eraser);
+                color = ContextCompat.getColor(MainActivity.this, R.color.white);
+                signatureView.setPenColor(color);
 
             }
         });
 
-        imgSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!signatureView.isBitmapEmpty()){
-                    try {
-                        saveImage();
-                    } catch (IOException e) {
-                        e.printStackTrace();
 
-                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
-                        Log.e("sat",e.toString());
-
-                    }
-
-                }
-                else {
-                        Toast.makeText(MainActivity.this,"Please Draw First",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     private void saveImage() throws IOException {
-        File file=new File(fileName);
-        Bitmap bitmap=signatureView.getSignatureBitmap();
+        File file = new File(fileName);
+        Bitmap bitmap = signatureView.getSignatureBitmap();
 
-        ByteArrayOutputStream bos=new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG,0,bos);
-        byte[] bitmapData=bos.toByteArray();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
+        byte[] bitmapData = bos.toByteArray();
 
-        FileOutputStream fos=new FileOutputStream(file);
+        FileOutputStream fos = new FileOutputStream(file);
         fos.write(bitmapData);
         fos.flush();
         fos.close();
 
-        Toast.makeText(this,"Painting Saved!",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Painting Saved!", Toast.LENGTH_SHORT).show();
 
     }
+
     private void openColorPicker() {
         AmbilWarnaDialog ambilWarnaDialog = new AmbilWarnaDialog(this, defaultColor, new AmbilWarnaDialog.OnAmbilWarnaListener() {
             @Override
@@ -169,5 +173,40 @@ public class MainActivity extends AppCompatActivity {
             }
         }).check();
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater=getMenuInflater();
+        menuInflater.inflate(R.menu.option_menu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.delete:
+                signatureView.clearCanvas();
+                Toast.makeText(this, "Clear", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.save:
+                if (!signatureView.isBitmapEmpty()) {
+                    try {
+                        saveImage();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+
+                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        Log.e("sat", e.toString());
+
+                    }
+
+                } else {
+                    Toast.makeText(MainActivity.this, "Please Draw First", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

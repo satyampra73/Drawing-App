@@ -37,6 +37,13 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1" />
 
+            <ImageView
+                android:id="@+id/penImg"
+                android:layout_width="20dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_baseline_brush_24"
+                />
+
             <TextView
                 android:id="@+id/txtPenSize"
                 android:layout_width="wrap_content"
@@ -53,34 +60,38 @@
             android:gravity="end">
 
             <ImageButton
+                android:id="@+id/btn_pen"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:padding="12dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_baseline_brush_24"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
                 android:id="@+id/btn_eraser"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_weight="1"
-                android:padding="12dp"
                 android:background="@color/white"
+                android:padding="12dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/eraser" />
+                android:src="@drawable/eraser"
+                tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
                 android:id="@+id/btn_color"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_weight="1"
-                android:padding="12dp"
                 android:background="@color/white"
+                android:padding="12dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/color" />
+                android:src="@drawable/color"
+                tools:ignore="SpeakableTextPresentCheck" />
 
-            <ImageButton
-                android:id="@+id/btn_save"
-                android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_weight="1"
-                android:padding="12dp"
-                android:background="@color/white"
-                android:scaleType="fitXY"
-                android:src="@drawable/download" />
 
 
         </LinearLayout>
